@@ -1,0 +1,5 @@
+[package]
+
+name = "ftree"
+version = "0.0.1"
+authors = ["Mike Verdone <mike.verdone@gmail.com>"]
