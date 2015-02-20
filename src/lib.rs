@@ -1,50 +1,56 @@
-use std::boxed;
-use std::any::Any;
-use std::option;
-use std::vec;
 
-struct Digit<T> {
-    vec: Vec<T>
+use std::clone::Clone;
+
+enum List {
+    Empty,
+    Value(isize, Box<List>)
 }
 
-impl<T> Digit<T> {
-    fn new(val0: T) -> Self {
-        let d : Digit<T>;
-        d.vec.push(val0);
-        return d;
+impl Clone for List {
+    fn clone(&self) -> Self {
+        match self {
+            &List::Empty => List::Empty,
+            &List::Value(v, ref next) => List::Value(v, next.clone())
+        }
     }
 }
 
-enum Node<T> {
-    Node2(T, T),
-    Node3(T, T, T)
-}
-
-trait FingerTree<T> {
-    fn dequeue(&self, elem: T) -> &'static FingerTree<T>;
-}
-
-enum FingerTreeImpl<T> {
-    Empty,
-    Single(T),
-    Deep(Digit<T>, Box<FingerTree<Node<T>> + 'static>, Digit<T>)
-}
-
-impl<T: 'static> FingerTree<T> for FingerTreeImpl<T> {
-    fn dequeue(&self, elem: T) -> &'static FingerTree<T> {
-        return match *self {
-            FingerTreeImpl::Empty => FingerTreeImpl::Single(elem),
-            FingerTreeImpl::Single(el) => FingerTreeImpl::Deep(
-                Digit::new(el),
-                Box::new(FingerTreeImpl::Empty),
-                Digit::new(elem)),
-            FingerTreeImpl::Deep(lDigit, ftree, rDigit) => FingerTreeImpl::Empty
-        };
+impl List {
+    fn new() -> List {
+        return List::Empty;
+    }
+    fn append(&self, value: isize) -> List {
+        match self {
+            &List::Empty => List::Value(value, Box::new(List::Empty)),
+            &List::Value(v, ref next) => List::Value(v, Box::new(next.append(value)))
+        }
+    }
+    fn head(&self) -> isize {
+        match self {
+            &List::Empty => panic!("Empty list"),
+            &List::Value(v, _) => v
+        }
+    }
+    fn tail(&self) -> List {
+        match self {
+            &List::Empty => panic!("Empty list"),
+            &List::Value(_, ref t) => *t.clone()
+        }
+    }
+    fn empty(&self) -> bool {
+        match self {
+            &List::Empty => true,
+            _ => false
+        }
     }
 }
 
 #[test]
 fn it_works() {
-    let ft = FingerTreeImpl::Empty;
-    let ft2 = ft.dequeue(123);
+    let l = List::new();
+    let l0 = l.append(123);
+    let l1 = l0.append(456);
+    assert_eq!(l1.head(), 123);
+    assert_eq!(l1.tail().head(), 456);
+    assert!(l0.tail().empty());
 }
