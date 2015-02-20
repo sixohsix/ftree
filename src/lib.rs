@@ -25,10 +25,10 @@ impl<T: Clone> List<T> {
             &List::Value(ref v, ref next) => List::Value(v.clone(), Box::new(next.append(value)))
         }
     }
-    fn head(&self) -> T {
+    fn head(&self) -> &T {
         match self {
             &List::Empty => panic!("Empty list"),
-            &List::Value(ref v, _) => v.clone()
+            &List::Value(ref v, _) => v
         }
     }
     fn tail(&self) -> List<T> {
@@ -50,7 +50,7 @@ fn it_works() {
     let l : List<isize> = List::new();
     let l0 = l.append(123);
     let l1 = l0.append(456);
-    assert_eq!(l1.head(), 123);
-    assert_eq!(l1.tail().head(), 456);
+    assert_eq!(*l1.head(), 123);
+    assert_eq!(*l1.tail().head(), 456);
     assert!(l0.tail().empty());
 }
