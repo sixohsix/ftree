@@ -1,37 +1,37 @@
 
 use std::clone::Clone;
 
-enum List {
+enum List<T: Clone> {
     Empty,
-    Value(isize, Box<List>)
+    Value(T, Box<List<T>>)
 }
 
-impl Clone for List {
+impl<T: Clone> Clone for List<T> {
     fn clone(&self) -> Self {
         match self {
             &List::Empty => List::Empty,
-            &List::Value(v, ref next) => List::Value(v, next.clone())
+            &List::Value(ref v, ref next) => List::Value(v.clone(), next.clone())
         }
     }
 }
 
-impl List {
-    fn new() -> List {
+impl<T: Clone> List<T> {
+    fn new() -> List<T> {
         return List::Empty;
     }
-    fn append(&self, value: isize) -> List {
+    fn append(&self, value: T) -> List<T> {
         match self {
             &List::Empty => List::Value(value, Box::new(List::Empty)),
-            &List::Value(v, ref next) => List::Value(v, Box::new(next.append(value)))
+            &List::Value(ref v, ref next) => List::Value(v.clone(), Box::new(next.append(value)))
         }
     }
-    fn head(&self) -> isize {
+    fn head(&self) -> T {
         match self {
             &List::Empty => panic!("Empty list"),
-            &List::Value(v, _) => v
+            &List::Value(ref v, _) => v.clone()
         }
     }
-    fn tail(&self) -> List {
+    fn tail(&self) -> List<T> {
         match self {
             &List::Empty => panic!("Empty list"),
             &List::Value(_, ref t) => *t.clone()
@@ -47,7 +47,7 @@ impl List {
 
 #[test]
 fn it_works() {
-    let l = List::new();
+    let l : List<isize> = List::new();
     let l0 = l.append(123);
     let l1 = l0.append(456);
     assert_eq!(l1.head(), 123);
