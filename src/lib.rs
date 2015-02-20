@@ -1,30 +1,20 @@
 use std::boxed;
 use std::any::Any;
 use std::option;
+use std::vec;
 
-#[derive(Copy,Debug)]
 struct Digit<T> {
-    elem: T,
-    next: Option<Box<Digit<T>>>
+    vec: Vec<T>
 }
 
-impl <T> Digit<T> {
-    fn full(&self) -> bool {
-        fn full2<T_>(digit: Digit<T_>, count: isize) -> bool {
-            if count == 0 {
-                return true;
-            }
-            match digit {
-                Digit{elem: e, next: Some(boxedDigit)} =>
-                    return full2(*boxedDigit, count - 1),
-                _ => return false
-            }
-        }
-        return full2(*self, 4);
+impl<T> Digit<T> {
+    fn new(val0: T) -> Self {
+        let d : Digit<T>;
+        d.vec.push(val0);
+        return d;
     }
 }
 
-#[derive(Copy,Debug)]
 enum Node<T> {
     Node2(T, T),
     Node3(T, T, T)
@@ -34,7 +24,6 @@ trait FingerTree<T> {
     fn dequeue(&self, elem: T) -> &'static FingerTree<T>;
 }
 
-#[derive(Copy,Debug)]
 enum FingerTreeImpl<T> {
     Empty,
     Single(T),
@@ -46,9 +35,9 @@ impl<T: 'static> FingerTree<T> for FingerTreeImpl<T> {
         return match *self {
             FingerTreeImpl::Empty => FingerTreeImpl::Single(elem),
             FingerTreeImpl::Single(el) => FingerTreeImpl::Deep(
-                Digit{elem: el, next: None},
+                Digit::new(el),
                 Box::new(FingerTreeImpl::Empty),
-                Digit{elem: elem, next: None}),
+                Digit::new(elem)),
             FingerTreeImpl::Deep(lDigit, ftree, rDigit) => FingerTreeImpl::Empty
         };
     }
